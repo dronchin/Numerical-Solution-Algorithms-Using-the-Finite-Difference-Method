@@ -34,19 +34,20 @@ int RelativeError(int n, double ans[]){
 
 int SimpleTridiagonal(int n){
   double h = 1 / (double)n;
-
-  double *B = new double[n];
-  for(int i = 0; i < n; i++){B[i] = h*h*100.0*exp(-10.0*i*h);}
-  double *D = new double[n];
-  D[0] = -2;
-
-  double *X = new double[n];
-
+  double *B = new double[n+1];
+  double *D = new double[n+1];
+  D[0] = D[n] = 2;
+  double *x = new double[n+1];
+  double *ans = new double[n+1];
+  ans[0] = ans[n] = 0.0;
   //precalculated D_new
-  for(int i = 1; i <= n; i++){
+  for(int i = 1; i < n; i++){
     D[i] = ((double)i+1.0)/((double)i);
   }
-
+  for(int i = 0; i <= n; i++){
+    B[i] = h*h*100.0*exp(-10.0*i*h);
+    x[i] = i*h;
+  }
   clock_t start, stop;
   start = clock();
 
@@ -54,32 +55,26 @@ int SimpleTridiagonal(int n){
   for(int i = 2; i < n; i++){
     B[i] = B[i] + B[i-1]/D[i-1];
   }
-  //Backward substitution
-  X[n-1] = B[n-1]/D[n-1];
-  for(int i = n-2; i > 0; i--){
-    X[i] = (B[i] + X[i+1])/D[i];
-  }
 
-  // cout << "x" <<endl;
-  // for(int i = 0; i < n; i++){
-  //   cout << X[i] << ", ";
-  // }
-  // cout << endl;
+  //Backward substitution
+  ans[n-1] = B[n-1]/D[n-1];
+  for(int i = n-2; i > 0; i--){
+    ans[i] = (B[i] + ans[i+1])/D[i];
+  }
 
   stop = clock();
   double timeused = (double) (stop - start)/(CLOCKS_PER_SEC );
 
   cout << "Time used for SimpleTridiagonal: " << timeused << endl;
 
-  RelativeError(n, X);
+  RelativeError(n, ans);
 
   delete [] B;
   delete [] D;
-  delete [] X;
+  delete [] ans;
+  delete [] x;
   return 0;
 }
-
-
 
 //=============================================================================
 // Main Start
